@@ -22,7 +22,7 @@ def main():
         ev = mac["homeTeam"]["name"]
         deplasman = mac["awayTeam"]["name"]
 
-        ev_xg, dep_xg = mac_xg([], [])
+        ev_xg, dep_xg = mac_xg(ev, deplasman)
         print(f"{ev} vs {deplasman}")
         print(f"  xG: {ev_xg} - {dep_xg}")
 
