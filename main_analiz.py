@@ -1,25 +1,44 @@
-import numpy as np
-from poisson_model import skor_olasiligi
-from elo_rating import EloRating
-from xg_model import hesapla_xg
+from datetime import datetime
+from poisson_model import poisson_skor
+from xg_model import mac_xg
 from edge_calculator import edge_hesapla
-from form_analysis import form_puani, trend_analizi
-from monte_carlo import monte_carlo_simulasyon, skor_dagilimi
+from elo_rating import elo_hesapla
+from form_analysis import form_analizi
+from monte_carlo import monte_carlo_sim
+import requests
+import config
 
-def analiz_et(home_xg, away_xg, home_elo, away_elo, home_form, away_form, home_odds, draw_odds, away_odds):
-    poisson = skor_olasiligi(home_xg, away_xg)
-    elo = EloRating()
-    home_exp = round(elo.expected_score(home_elo, away_elo) * 100, 1)
+def get_fixtures():
+    url = f"https://api.football-data.org/v4/matches"
+    headers = {"X-Auth-Token": config.FOOTBALL_DATA_API}
+    response = requests.get(url, headers=headers)
+    return response.json().get('matches', [])
+
+def main():
+    print(f"=== FUTBOL ANALİZ SİSTEMİ ===")
+    print(f"Çalışma zamanı: {datetime.now()}\n")
     
-    home_edge = edge_hesapla(home_odds, poisson['home_win'])
-    draw_edge = edge_hesapla(draw_odds, poisson['draw'])
-    away_edge = edge_hesapla(away_odds, poisson['away_win'])
+    maclar = get_fixtures()
+    print(f"{len(maclar)} maç bulundu.\n")
     
-    print(f"Poisson: Ev %{poisson['home_win']} Ber %{poisson['draw']} Dep %{poisson['away_win']}")
-    print(f"Elo: Ev kazanma ihtimali %{home_exp}")
-    print(f"Monte Carlo: {monte_carlo_simulasyon(home_xg, away_xg)}")
-    print(f"En olası 3 skor: {list(skor_dagilimi(home_xg, away_xg).items())[:3]}")
-    print(f"Edge: Ev %{home_edge} Ber %{draw_edge} Dep %{away_edge}")
+    for mac in maclar[:5]:  # ilk 5 maç
+        ev = mac['homeTeam']['name']
+        deplasman = mac['awayTeam']['name']
+        
+        # xG hesapla
+        ev_xg, dep_xg = mac_xg([], [])  # Gerçek veri gelince düzelteceğiz
+        print(f"{ev} vs {deplasman}")
+        print(f"  xG: {ev_xg} - {dep_xg}")
+        
+        # Poisson ile skor olasılıkları
+        skorlar = poisson_skor(ev_xg, dep_xg)
+        print(f"  En olası skor: {max(skorlar, key=skorlar.get)}")
+        
+        # Edge hesapla
+        edge = edge_hesapla(ev_xg, dep_xg)
+        if edge > 5:
+            print(f"  ⚡ VALUE BET! Edge: %{edge:.1f}")
+        print()
 
 if __name__ == "__main__":
-    analiz_et(1.5, 1.2, 1500, 1450, 15, 12, 1.85, 3.40, 4.00)
+    main()
