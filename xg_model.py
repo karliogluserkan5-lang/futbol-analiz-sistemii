@@ -1,27 +1,16 @@
-import numpy as np
+import requests
+from bs4 import BeautifulSoup
 
-def hesapla_xg(shots, shots_on_target, goals, possession):
-    # Gelişmiş xG hesaplama (ağırlıklı)
-    xg = (shots_on_target * 0.35) + (shots * 0.05) + (goals * 0.15) + (possession * 0.02)
-    return round(min(xg, 4.0), 2)
+def understat_xg(team_name):
+    # Understat'dan takım xG'sini çeker (basit örnek)
+    # Gerçek scrape için daha detaylı kod gerekir
+    return 1.8  # geçici
 
-def takim_xg(son_maclar):
-    if not son_maclar:
-        return 1.5
-    toplam = 0
-    for mac in son_maclar[-5:]:  # son 5 maç
-        toplam += hesapla_xg(
-            mac.get('shots', 10),
-            mac.get('shots_on_target', 4),
-            mac.get('goals', 1),
-            mac.get('possession', 50)
-        )
-    return round(toplam / min(5, len(son_maclar)), 2)
+def takim_xg(team_name):
+    xg = understat_xg(team_name)
+    return xg
 
-def mac_xg(home_stats, away_stats):
-    home_xg = takim_xg(home_stats)
-    away_xg = takim_xg(away_stats)
-    return home_xg, away_xg
-
-if __name__ == "__main__":
-    print(f"Örnek xG: {hesapla_xg(12, 5, 2, 55)}")
+def mac_xg(ev, dep):
+    ev_xg = takim_xg(ev)
+    dep_xg = takim_xg(dep)
+    return ev_xg, dep_xg
