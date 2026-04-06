@@ -1,4 +1,4 @@
 requests
 numpy
 scipy
-python-telegram-bot
+pymongo
