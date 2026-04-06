@@ -2,9 +2,6 @@ from datetime import datetime
 from poisson_model import poisson_skor
 from xg_model import mac_xg
 from edge_calculator import edge_hesapla
-from elo_rating import elo_hesapla
-from form_analysis import form_analizi
-from monte_carlo import monte_carlo_sim
 import requests
 import config
 
@@ -15,11 +12,11 @@ def get_fixtures():
     return response.json().get("matches", [])
 
 def main():
-    print(f"=== FUTBOL ANALİZ SİSTEMİ ===")
-    print(f"Çalışma zamanı: {datetime.now()}\n")
+    print(f"=== FUTBOL ANALIZ SISTEMI ===")
+    print(f"Calisma zamani: {datetime.now()}\n")
 
     maclar = get_fixtures()
-    print(f"{len(maclar)} maç bulundu.\n")
+    print(f"{len(maclar)} mac bulundu.\n")
 
     for mac in maclar[:5]:
         ev = mac["homeTeam"]["name"]
@@ -34,7 +31,7 @@ def main():
 
         edge = edge_hesapla(ev_xg, dep_xg)
         if edge > 5:
-            print(f"  ⚡ VALUE BET! Edge: %{edge:.1f}")
+            print(f"  VALUE BET! Edge: %{edge:.1f}")
         print()
 
 if __name__ == "__main__":
